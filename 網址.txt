@@ -1,0 +1,11 @@
+中區建材行 GPS 打卡系統 - 網址
+==================
+
+Firebase Hosting：
+https://opencode-sk.web.app
+
+（共用 opencode-sk Firebase 專案，資料用 gps_中區建材行 collection 獨立存放）
+
+管理員登入：
+  帳號：管理員
+  密碼：admin123

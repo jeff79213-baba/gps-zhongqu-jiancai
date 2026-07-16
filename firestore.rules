@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /gps_attendance/{document=**} {
+      allow read, write: if true;
+    }
+    match /gps_中區建材行/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
