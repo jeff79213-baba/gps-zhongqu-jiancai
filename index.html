@@ -338,7 +338,7 @@ tr:hover td{background:#f8fafc}
       </div>
       <div class="cal-grid" id="calBody"></div>
       <div style="margin-top:12px;font-size:11px;color:var(--text-light);display:flex;gap:12px;flex-wrap:wrap">
-        <span>🟢 準時</span><span>🔴 遲到</span><span>⚫ 缺勤</span><span>🔵 休息日</span>
+        <span>🟢 準時</span><span>🔴 遲到</span><span>⚫ 缺勤</span><span>🔵 休息日</span><span>🏷️ 特定休假日</span>
       </div>
     </div>
   </div>
@@ -461,6 +461,16 @@ tr:hover td{background:#f8fafc}
       <div id="restDaySettings"></div>
       <button class="btn btn-success btn-sm" onclick="saveRestDays()" style="width:100%;margin-top:8px">💾 儲存休息日</button>
 
+      <div class="card-title" style="margin-top:16px">🎌 特定休假日</div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px">新增特定日期作為休息日（如國定假日、公司特休）</div>
+      <div id="holidayList"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="date" id="holidayDate" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+        <input type="text" id="holidayName" placeholder="假日名稱" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addHoliday()" style="width:100%;margin-top:6px">➕ 新增休假日</button>
+      <button class="btn btn-success btn-sm" onclick="saveHolidays()" style="width:100%;margin-top:6px">💾 儲存休假日設定</button>
+
       <div class="card-title" style="margin-top:16px">🔢 員工編號規則</div>
       <div class="setting-row">
         <div class="setting-label">編號前綴<small>例：A、B、EMP</small></div>
@@ -514,13 +524,13 @@ tr:hover td{background:#f8fafc}
 
   <!-- Bottom Nav -->
   <div class="bottom-nav">
-    <button class="nav-btn active" onclick="switchPage('Clock',this)">
+    <button class="nav-btn active" id="navClock" onclick="switchPage('Clock',this)">
       <span class="icon">📍</span>打卡
     </button>
-    <button class="nav-btn" onclick="switchPage('History',this)">
+    <button class="nav-btn" id="navHistory" onclick="switchPage('History',this)">
       <span class="icon">📋</span>紀錄
     </button>
-    <button class="nav-btn" onclick="switchPage('Calendar',this)">
+    <button class="nav-btn" id="navCalendar" onclick="switchPage('Calendar',this)">
       <span class="icon">📅</span>月曆
     </button>
     <button class="nav-btn hidden" id="navAdmin" onclick="switchPage('Admin',this)">
@@ -594,6 +604,7 @@ let settings = {
   idStartNum: 1,
   idDigits: 3,
   restDays: [0, 6],
+  specificHolidays: [],
   adminPw: "admin123"
 };
 
@@ -665,9 +676,19 @@ function enterApp() {
   if (currentUser.role === "admin") {
     document.getElementById("navAdmin").classList.remove("hidden");
     document.getElementById("adminSettingsCard").classList.remove("hidden");
+    document.getElementById("navClock").classList.add("hidden");
+    document.getElementById("navHistory").classList.add("hidden");
+    document.getElementById("navCalendar").classList.add("hidden");
+    document.getElementById("pageClock").classList.remove("active");
+    document.getElementById("pageAdmin").classList.add("active");
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("navAdmin").classList.add("active");
   } else {
     document.getElementById("navAdmin").classList.add("hidden");
     document.getElementById("adminSettingsCard").classList.add("hidden");
+    document.getElementById("navClock").classList.remove("hidden");
+    document.getElementById("navHistory").classList.remove("hidden");
+    document.getElementById("navCalendar").classList.remove("hidden");
   }
 
   loadSettings();
@@ -676,6 +697,7 @@ function enterApp() {
   initLocation();
   populateMonthSelects();
   buildRestDayUI();
+  renderHolidayList();
   loadTodayStats();
   if (currentUser.role === "admin") { loadAdminData(); loadEmployeeList(); }
 
@@ -991,6 +1013,7 @@ async function loadCalendar() {
     const dateStr = `${ym}-${String(d).padStart(2,'0')}`;
     const dayOfWeek = new Date(year, month-1, d).getDay();
     const isWeekend = settings.restDays.includes(dayOfWeek);
+    const holiday = isSpecificHoliday(dateStr);
     const isToday = dateStr === today;
     const g = grouped[dateStr] || {};
     const hasRecord = g.clockin || g.clockout;
@@ -998,16 +1021,17 @@ async function loadCalendar() {
 
     let cls = "cal-day";
     if (isToday) cls += " today";
-    if (isWeekend && !hasRecord) cls += " weekend";
+    if ((isWeekend || holiday) && !hasRecord) cls += " weekend";
     if (hasRecord && isLate) cls += " late";
     if (hasRecord) cls += " has-record";
-    if (!isWeekend && !hasRecord && dateStr < today) cls += " absent";
+    if (!isWeekend && !holiday && !hasRecord && dateStr < today) cls += " absent";
 
-    let tooltip = "";
+    let tooltip = holiday ? `${holiday.name} ` : "";
     if (g.clockin) tooltip += `上:${g.clockin.time.slice(0,5)} `;
     if (g.clockout) tooltip += `下:${g.clockout.time.slice(0,5)}`;
 
-    html += `<div class="${cls}" title="${tooltip}">${d}</div>`;
+    const holidayTag = holiday ? `<span class="holiday-tag holiday-rest">${holiday.name}</span>` : "";
+    html += `<div class="${cls}" title="${tooltip}">${d}${holidayTag}</div>`;
   }
   document.getElementById("calBody").innerHTML = html;
 }
@@ -1218,6 +1242,55 @@ async function saveRestDays() {
   showToast("✅ 休息日已更新", 2000);
 }
 
+// ============ SPECIFIC HOLIDAYS ============
+function renderHolidayList() {
+  const holidays = settings.specificHolidays || [];
+  if (holidays.length === 0) {
+    document.getElementById("holidayList").innerHTML = '<div style="text-align:center;color:var(--text-light);padding:12px;font-size:13px">尚未設定特定休假日</div>';
+    return;
+  }
+  let html = '';
+  holidays.sort((a,b) => a.date.localeCompare(b.date)).forEach((h, i) => {
+    html += `<div class="history-row">
+      <div class="history-date">${h.date}</div>
+      <div class="history-times"><strong>${h.name}</strong></div>
+      <button class="btn btn-danger btn-sm" onclick="removeHoliday(${i})">✕</button>
+    </div>`;
+  });
+  document.getElementById("holidayList").innerHTML = html;
+}
+
+function addHoliday() {
+  const date = document.getElementById("holidayDate").value;
+  const name = document.getElementById("holidayName").value.trim();
+  if (!date || !name) { showToast("⚠️ 請填寫日期和名稱", 2000); return; }
+  if (!settings.specificHolidays) settings.specificHolidays = [];
+  if (settings.specificHolidays.some(h => h.date === date)) {
+    showToast("⚠️ 該日期已存在", 2000); return;
+  }
+  settings.specificHolidays.push({date, name});
+  document.getElementById("holidayDate").value = "";
+  document.getElementById("holidayName").value = "";
+  renderHolidayList();
+  showToast("✅ 已加入，請按儲存", 2000);
+}
+
+function removeHoliday(index) {
+  settings.specificHolidays.splice(index, 1);
+  renderHolidayList();
+}
+
+async function saveHolidays() {
+  if (!settings.specificHolidays) settings.specificHolidays = [];
+  await db.collection(COLLECTION).doc("settings").set(settings);
+  showToast("✅ 特定休假日已更新", 2000);
+}
+
+function isSpecificHoliday(dateStr) {
+  if (!settings.specificHolidays) return null;
+  return settings.specificHolidays.find(h => h.date === dateStr) || null;
+}
+
 // ============ ID RULE ============
 function updateIdPreview() {
   const prefix = document.getElementById("idPrefix").value.toUpperCase() || "A";
@@ -1329,7 +1402,7 @@ function switchPage(name, btn) {
   if (name === "Admin" && currentUser.role === "admin") { loadAdminData(); loadEmployeeList(); }
   if (name === "History") loadHistory();
   if (name === "Calendar") loadCalendar();
-  if (name === "Profile") buildRestDayUI();
+  if (name === "Profile") { buildRestDayUI(); renderHolidayList(); }
 }
 
 function showToast(msg, duration) {
