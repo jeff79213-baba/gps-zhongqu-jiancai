@@ -343,6 +343,206 @@ tr:hover td{background:#f8fafc}
     </div>
   </div>
 
+  <!-- Page: 出勤總覽 -->
+  <div id="pageOverview" class="page">
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <h1>📊 出勤總覽</h1>
+          <div class="sub">全部員工出勤狀況</div>
+        </div>
+        <button class="header-btn" onclick="exportOverviewCSV()">📥 匯出</button>
+      </div>
+    </div>
+
+    <div class="stats-grid" id="overviewStatsGrid">
+      <div class="stat-box stat-blue"><div class="num" id="ovStatTotal">0</div><div class="lbl">本月出勤</div></div>
+      <div class="stat-box stat-green"><div class="num" id="ovStatOnTime">0</div><div class="lbl">準時</div></div>
+      <div class="stat-box stat-red"><div class="num" id="ovStatLate">0</div><div class="lbl">遲到</div></div>
+      <div class="stat-box stat-orange"><div class="num" id="ovStatOT">0</div><div class="lbl">加班(時)</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 出勤紀錄</div>
+      <div class="filter-bar">
+        <select id="overviewMonth" onchange="loadOverviewData()"></select>
+        <select id="overviewEmployee" onchange="loadOverviewData()">
+          <option value="all">全部員工</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>員工</th><th>日期</th><th>上班</th><th>下班</th><th>工時</th><th>狀態</th></tr></thead>
+          <tbody id="overviewTableBody"><tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page: 薪資試算 -->
+  <div id="pageSalary" class="page">
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <h1>💰 薪資試算</h1>
+          <div class="sub">依出勤紀錄自動計算</div>
+        </div>
+        <button class="header-btn" onclick="exportSalaryCSV()">📥 匯出</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="filter-bar">
+        <select id="salaryMonth" onchange="loadSalaryData()"></select>
+      </div>
+      <div id="salaryCards"><div class="loading"><div class="spinner"></div>載入中...</div></div>
+    </div>
+  </div>
+
+  <!-- Page: 系統設定 -->
+  <div id="pageSettings" class="page">
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <h1>🏢 系統設定</h1>
+          <div class="sub">打卡範圍、時間、獎金等設定</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📍 打卡範圍設定</div>
+      <div class="setting-row">
+        <div class="setting-label">公司定位<small>打卡中心點</small></div>
+        <div class="setting-value" id="companyLocation2">未設定</div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">打卡範圍<small>允許打卡的半徑距離</small></div>
+        <div class="setting-value" id="companyRange2">500 公尺</div>
+      </div>
+      <div class="form-group">
+        <label>設定公司位置（在公司內操作）</label>
+        <button class="btn btn-primary btn-sm" onclick="setCompanyLocation()" style="width:100%">📍 取得目前位置作為公司</button>
+      </div>
+      <div class="form-group">
+        <label>打卡範圍（公尺）</label>
+        <input type="number" id="inputRange2" value="500" min="50" max="10000" step="50">
+        <button class="btn btn-success btn-sm" onclick="saveCompanyRange()" style="width:100%;margin-top:6px">💾 儲存範圍</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⏰ 上下班時間</div>
+      <div class="setting-row">
+        <div class="setting-label">上班時間</div>
+        <div class="setting-value"><input type="time" id="workStart2" value="09:00" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:90px"></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">下班時間</div>
+        <div class="setting-value"><input type="time" id="workEnd2" value="18:00" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:90px"></div>
+      </div>
+      <button class="btn btn-success btn-sm" onclick="saveWorkHours()" style="width:100%;margin-top:4px">💾 儲存上下班時間</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🍽️ 休息時間設定</div>
+      <div class="setting-row">
+        <div class="setting-label">午休開始</div>
+        <div class="setting-value"><input type="time" id="lunchStart" value="12:00" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:90px"></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">午休結束</div>
+        <div class="setting-value"><input type="time" id="lunchEnd" value="13:00" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:90px"></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">午休時間扣除<small>計算工時時是否扣除休息時間</small></div>
+        <div class="setting-value"><label style="cursor:pointer"><input type="checkbox" id="lunchDeduct" style="accent-color:var(--primary)"> 啟用</label></div>
+      </div>
+      <button class="btn btn-success btn-sm" onclick="saveLunchSettings()" style="width:100%;margin-top:4px">💾 儲存休息時間</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏆 全勤獎金設定</div>
+      <div class="setting-row">
+        <div class="setting-label">全勤獎金<small>當月全勤發給的金額</small></div>
+        <div class="setting-value"><input type="number" id="fullAttBonus" value="0" min="0" step="100" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:90px"> 元</div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">全勤條件<small>無遲到且無缺勤</small></div>
+        <div class="setting-value" style="color:var(--text-light);font-size:12px">無遲到 + 無缺勤 = 發全勤</div>
+      </div>
+      <button class="btn btn-success btn-sm" onclick="saveFullAttBonus()" style="width:100%;margin-top:4px">💾 儲存全勤獎金</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 休息日設定</div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px">勾選公司固定休息日（這些天不需打卡）</div>
+      <div id="restDaySettings2"></div>
+      <button class="btn btn-success btn-sm" onclick="saveRestDays()" style="width:100%;margin-top:8px">💾 儲存休息日</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎌 特定休假日</div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px">新增特定日期作為休息日（如國定假日、公司特休）</div>
+      <div id="holidayList2"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="date" id="holidayDate2" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+        <input type="text" id="holidayName2" placeholder="假日名稱" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addHoliday()" style="width:100%;margin-top:6px">➕ 新增休假日</button>
+      <button class="btn btn-success btn-sm" onclick="saveHolidays()" style="width:100%;margin-top:6px">💾 儲存休假日設定</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔢 員工編號規則</div>
+      <div class="setting-row">
+        <div class="setting-label">編號前綴<small>例：A、B、EMP</small></div>
+        <div class="setting-value"><input type="text" id="idPrefix2" value="A" maxlength="5" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:70px;text-transform:uppercase"></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">起始編號</div>
+        <div class="setting-value"><input type="number" id="idStartNum2" value="1" min="1" max="9999" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:70px"></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">編號位數<small>補零用</small></div>
+        <div class="setting-value"><input type="number" id="idDigits2" value="3" min="1" max="6" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:70px"></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">預覽</div>
+        <div class="setting-value" id="idPreview2" style="font-size:15px">A001</div>
+      </div>
+      <button class="btn btn-success btn-sm" onclick="saveIdRule()" style="width:100%;margin-top:4px">💾 儲存編號規則</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔒 修改管理員密碼</div>
+      <div class="form-group">
+        <label>目前密碼</label>
+        <div class="pw-wrap">
+          <input type="password" id="adminOldPw" placeholder="輸入目前密碼">
+          <button type="button" class="pw-toggle" onclick="togglePw('adminOldPw',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>新密碼</label>
+        <div class="pw-wrap">
+          <input type="password" id="adminNewPw" placeholder="至少4個字元">
+          <button type="button" class="pw-toggle" onclick="togglePw('adminNewPw',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>確認新密碼</label>
+        <div class="pw-wrap">
+          <input type="password" id="adminNewPw2" placeholder="再輸入一次">
+          <button type="button" class="pw-toggle" onclick="togglePw('adminNewPw2',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+      </div>
+      <div id="adminPwError" class="error-msg hidden"></div>
+      <div id="adminPwSuccess" class="success-msg hidden"></div>
+      <button class="btn btn-primary btn-sm" onclick="changeAdminPassword()" style="width:100%">🔒 修改密碼</button>
+    </div>
+  </div>
+
   <!-- Page: 管理後台 -->
   <div id="pageAdmin" class="page">
     <div class="header">
@@ -390,6 +590,17 @@ tr:hover td{background:#f8fafc}
         <input type="text" id="addEmpName" placeholder="例：王小明">
       </div>
       <div class="form-group">
+        <label>角色</label>
+        <select id="addEmpRole" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+          <option value="employee">一般員工</option>
+          <option value="accountant">會計人員</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>基本月薪（元）</label>
+        <input type="number" id="addEmpSalary" placeholder="例：28000" min="0" step="1000">
+      </div>
+      <div class="form-group">
         <label>初始密碼</label>
         <div class="pw-wrap">
           <input type="password" id="addEmpPw" placeholder="員工首次登入後需更改">
@@ -400,6 +611,34 @@ tr:hover td{background:#f8fafc}
       <div class="card-title" style="margin-top:16px">📋 員工列表</div>
       <div id="employeeList"><div class="loading"><div class="spinner"></div>載入中...</div></div>
     </div>
+
+    <div class="card">
+      <div class="card-title">📋 補登打卡</div>
+      <div id="makeupError" class="error-msg hidden"></div>
+      <div id="makeupSuccess" class="success-msg hidden"></div>
+      <div class="form-group">
+        <label>選擇員工</label>
+        <select id="makeupEmployee" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+          <option value="">請選擇員工</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>日期</label>
+        <input type="date" id="makeupDate">
+      </div>
+      <div class="form-group">
+        <label>類型</label>
+        <select id="makeupType" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+          <option value="clockin">上班打卡</option>
+          <option value="clockout">下班打卡</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>時間</label>
+        <input type="time" id="makeupTime" value="09:00">
+      </div>
+      <button class="btn btn-primary" onclick="doMakeupPunch()" style="width:100%">📋 補登</button>
+    </div>
   </div>
 
   <!-- Page: 個人設定 -->
@@ -408,7 +647,7 @@ tr:hover td{background:#f8fafc}
       <div class="header-top">
         <div>
           <h1>👤 個人設定</h1>
-          <div class="sub">帳號與系統設定</div>
+          <div class="sub">帳號資訊</div>
         </div>
       </div>
     </div>
@@ -423,98 +662,6 @@ tr:hover td{background:#f8fafc}
         <div class="setting-label">員工帳號</div>
         <div class="setting-value" id="profileId">--</div>
       </div>
-    </div>
-
-    <div class="card" id="adminSettingsCard">
-      <div class="card-title">🏢 打卡範圍設定 <span style="font-size:11px;color:var(--text-light);font-weight:400">(管理員)</span></div>
-      <div class="setting-row">
-        <div class="setting-label">公司定位<small>打卡中心點</small></div>
-        <div class="setting-value" id="companyLocation">未設定</div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label">打卡範圍<small>允許打卡的半徑距離</small></div>
-        <div class="setting-value" id="companyRange">500 公尺</div>
-      </div>
-      <div class="form-group">
-        <label>設定公司位置（在公司內操作）</label>
-        <button class="btn btn-primary btn-sm" onclick="setCompanyLocation()" style="width:100%">📍 取得目前位置作為公司</button>
-      </div>
-      <div class="form-group">
-        <label>打卡範圍（公尺）</label>
-        <input type="number" id="inputRange" value="500" min="50" max="10000" step="50">
-        <button class="btn btn-success btn-sm" onclick="saveCompanyRange()" style="width:100%;margin-top:6px">💾 儲存範圍</button>
-      </div>
-
-      <div class="card-title" style="margin-top:16px">⏰ 上下班時間</div>
-      <div class="setting-row">
-        <div class="setting-label">上班時間</div>
-        <div class="setting-value"><input type="time" id="workStart" value="09:00" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:90px"></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label">下班時間</div>
-        <div class="setting-value"><input type="time" id="workEnd" value="18:00" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:90px"></div>
-      </div>
-      <button class="btn btn-success btn-sm" onclick="saveWorkHours()" style="width:100%;margin-top:4px">💾 儲存上下班時間</button>
-
-      <div class="card-title" style="margin-top:16px">📅 休息日設定</div>
-      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px">勾選公司固定休息日（這些天不需打卡）</div>
-      <div id="restDaySettings"></div>
-      <button class="btn btn-success btn-sm" onclick="saveRestDays()" style="width:100%;margin-top:8px">💾 儲存休息日</button>
-
-      <div class="card-title" style="margin-top:16px">🎌 特定休假日</div>
-      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px">新增特定日期作為休息日（如國定假日、公司特休）</div>
-      <div id="holidayList"></div>
-      <div style="display:flex;gap:6px;margin-top:8px">
-        <input type="date" id="holidayDate" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">
-        <input type="text" id="holidayName" placeholder="假日名稱" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">
-      </div>
-      <button class="btn btn-primary btn-sm" onclick="addHoliday()" style="width:100%;margin-top:6px">➕ 新增休假日</button>
-      <button class="btn btn-success btn-sm" onclick="saveHolidays()" style="width:100%;margin-top:6px">💾 儲存休假日設定</button>
-
-      <div class="card-title" style="margin-top:16px">🔢 員工編號規則</div>
-      <div class="setting-row">
-        <div class="setting-label">編號前綴<small>例：A、B、EMP</small></div>
-        <div class="setting-value"><input type="text" id="idPrefix" value="A" maxlength="5" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:70px;text-transform:uppercase"></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label">起始編號</div>
-        <div class="setting-value"><input type="number" id="idStartNum" value="1" min="1" max="9999" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:70px"></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label">編號位數<small>補零用</small></div>
-        <div class="setting-value"><input type="number" id="idDigits" value="3" min="1" max="6" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;width:70px"></div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label">預覽</div>
-        <div class="setting-value" id="idPreview" style="font-size:15px">A001</div>
-      </div>
-      <button class="btn btn-success btn-sm" onclick="saveIdRule()" style="width:100%;margin-top:4px">💾 儲存編號規則</button>
-
-      <div class="card-title" style="margin-top:16px">🔒 修改管理員密碼</div>
-      <div class="form-group">
-        <label>目前密碼</label>
-        <div class="pw-wrap">
-          <input type="password" id="adminOldPw" placeholder="輸入目前密碼">
-          <button type="button" class="pw-toggle" onclick="togglePw('adminOldPw',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>新密碼</label>
-        <div class="pw-wrap">
-          <input type="password" id="adminNewPw" placeholder="至少4個字元">
-          <button type="button" class="pw-toggle" onclick="togglePw('adminNewPw',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>確認新密碼</label>
-        <div class="pw-wrap">
-          <input type="password" id="adminNewPw2" placeholder="再輸入一次">
-          <button type="button" class="pw-toggle" onclick="togglePw('adminNewPw2',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-        </div>
-      </div>
-      <div id="adminPwError" class="error-msg hidden"></div>
-      <div id="adminPwSuccess" class="success-msg hidden"></div>
-      <button class="btn btn-primary btn-sm" onclick="changeAdminPassword()" style="width:100%">🔒 修改密碼</button>
     </div>
 
     <div class="card">
@@ -533,11 +680,20 @@ tr:hover td{background:#f8fafc}
     <button class="nav-btn" id="navCalendar" onclick="switchPage('Calendar',this)">
       <span class="icon">📅</span>月曆
     </button>
+    <button class="nav-btn hidden" id="navOverview" onclick="switchPage('Overview',this)">
+      <span class="icon">📊</span>總覽
+    </button>
+    <button class="nav-btn hidden" id="navSalary" onclick="switchPage('Salary',this)">
+      <span class="icon">💰</span>薪資
+    </button>
     <button class="nav-btn hidden" id="navAdmin" onclick="switchPage('Admin',this)">
       <span class="icon">⚙️</span>管理
     </button>
+    <button class="nav-btn hidden" id="navSettings" onclick="switchPage('Settings',this)">
+      <span class="icon">🏢</span>設定
+    </button>
     <button class="nav-btn" onclick="switchPage('Profile',this)">
-      <span class="icon">👤</span>設定
+      <span class="icon">👤</span>個人
     </button>
   </div>
 </div>
@@ -605,7 +761,13 @@ let settings = {
   idDigits: 3,
   restDays: [0, 6],
   specificHolidays: [],
-  adminPw: "admin123"
+  adminPw: "admin123",
+  accountantPw: "acc123",
+  lunchStart: "12:00",
+  lunchEnd: "13:00",
+  lunchDeduct: false,
+  fullAttendanceBonus: 0,
+  fullAttendanceCondition: "no_late_no_absent"
 };
 
 // ============ CLOCK ============
@@ -642,6 +804,14 @@ async function doLogin() {
       return;
     }
 
+    if (id === "會計" && pw === settings.accountantPw) {
+      currentUser = {id:"會計", name:"會計人員", role:"accountant"};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
+      errEl.classList.add("hidden");
+      enterApp();
+      return;
+    }
+
     const doc = await db.collection(COLLECTION).doc("employees").get();
     const employees = doc.exists ? doc.data().list : [];
     const emp = employees.find(e => e.id === id && e.pw === pw);
@@ -671,25 +841,21 @@ function enterApp() {
   document.getElementById("welcomeMsg").textContent = `歡迎回來，${currentUser.name}`;
   document.getElementById("profileName").textContent = currentUser.name;
   document.getElementById("profileId").textContent = currentUser.id;
-  document.getElementById("profileRole").textContent = currentUser.role === "admin" ? "管理員" : "一般員工";
+  const roleLabels = {admin:"系統管理員", accountant:"會計人員", employee:"一般員工"};
+  document.getElementById("profileRole").textContent = roleLabels[currentUser.role] || "一般員工";
 
-  if (currentUser.role === "admin") {
-    document.getElementById("navAdmin").classList.remove("hidden");
-    document.getElementById("adminSettingsCard").classList.remove("hidden");
-    document.getElementById("navClock").classList.add("hidden");
-    document.getElementById("navHistory").classList.add("hidden");
-    document.getElementById("navCalendar").classList.add("hidden");
-    document.getElementById("pageClock").classList.remove("active");
-    document.getElementById("pageAdmin").classList.add("active");
-    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
-    document.getElementById("navAdmin").classList.add("active");
-  } else {
-    document.getElementById("navAdmin").classList.add("hidden");
-    document.getElementById("adminSettingsCard").classList.add("hidden");
-    document.getElementById("navClock").classList.remove("hidden");
-    document.getElementById("navHistory").classList.remove("hidden");
-    document.getElementById("navCalendar").classList.remove("hidden");
-  }
+  const isAdmin = currentUser.role === "admin";
+  const isAccountant = currentUser.role === "accountant";
+
+  document.getElementById("navAdmin").classList.toggle("hidden", !isAdmin);
+  document.getElementById("navSettings").classList.toggle("hidden", !isAdmin);
+  document.getElementById("navOverview").classList.toggle("hidden", !isAdmin && !isAccountant);
+  document.getElementById("navSalary").classList.toggle("hidden", !isAdmin && !isAccountant);
+
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById("pageClock").classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("navClock").classList.add("active");
 
   loadSettings();
   loadTodayRecords();
@@ -699,7 +865,7 @@ function enterApp() {
   buildRestDayUI();
   renderHolidayList();
   loadTodayStats();
-  if (currentUser.role === "admin") { loadAdminData(); loadEmployeeList(); }
+  if (isAdmin) { loadAdminData(); loadEmployeeList(); loadMakeupEmployeeList(); }
 
   if (currentUser.forcePasswordChange && currentUser.role !== "admin") {
     document.getElementById("pwChangeModal").style.display = "flex";
@@ -880,14 +1046,26 @@ async function loadTodayStats() {
   try {
     const snap = await db.collection(COLLECTION).doc("records").collection(currentUser.id).get();
     let lateCount = 0, overtimeHrs = 0;
+    const monthRecords = [];
     snap.forEach(doc => {
       const r = doc.data();
-      if (r.date && r.date.startsWith(ym)) {
-        if (r.type === "clockin" && r.time.slice(0,5) > settings.workStart) lateCount++;
+      if (r.date && r.date.startsWith(ym)) monthRecords.push(r);
+    });
+    const byDate = {};
+    monthRecords.forEach(r => {
+      if (!byDate[r.date]) byDate[r.date] = {};
+      byDate[r.date][r.type] = r;
+    });
+    Object.values(byDate).forEach(day => {
+      if (day.clockin && day.clockin.time.slice(0,5) > settings.workStart) lateCount++;
+      if (day.clockin && day.clockout) {
+        const workEndMin = parseInt(settings.workEnd.split(':')[0])*60 + parseInt(settings.workEnd.split(':')[1]);
+        const outMin = parseInt(day.clockout.time.slice(0,2))*60 + parseInt(day.clockout.time.slice(3,5));
+        if (outMin > workEndMin) overtimeHrs += (outMin - workEndMin) / 60;
       }
     });
     document.getElementById("statLate").textContent = lateCount > 0 ? lateCount : "0";
-    document.getElementById("statOvertime").textContent = overtimeHrs > 0 ? overtimeHrs + "h" : "0";
+    document.getElementById("statOvertime").textContent = overtimeHrs > 0 ? overtimeHrs.toFixed(1) + "h" : "0";
   } catch(e) { console.error(e); }
 }
 
@@ -946,6 +1124,8 @@ function populateMonthSelects() {
   document.getElementById("historyMonth").innerHTML = html;
   document.getElementById("adminMonth").innerHTML = html;
   document.getElementById("calMonth").innerHTML = html;
+  document.getElementById("overviewMonth").innerHTML = html;
+  document.getElementById("salaryMonth").innerHTML = html;
 }
 
 async function loadHistory() {
@@ -1064,39 +1244,261 @@ async function loadAdminData() {
       });
     }
 
-    allRecords.sort((a,b) => b.timestamp - a.timestamp);
+    allRecords.sort((a,b) => a.timestamp - b.timestamp);
     allAdminData = allRecords;
 
-    let totalLate = 0, totalOvertime = 0;
-    let html = "";
+    const grouped = {};
     allRecords.forEach(r => {
-      const isLate = r.type === "clockin" && r.time.slice(0,5) > settings.workStart;
+      const key = r.employeeId + "_" + r.date;
+      if (!grouped[key]) grouped[key] = {employeeId:r.employeeId, employeeName:r.employeeName, date:r.date, clockin:null, clockout:null};
+      if (r.type === "clockin" && !grouped[key].clockin) grouped[key].clockin = r;
+      if (r.type === "clockout" && !grouped[key].clockout) grouped[key].clockout = r;
+    });
+
+    let totalLate = 0, totalOvertime = 0;
+    const groupedArr = Object.values(grouped).sort((a,b) => {
+      if (a.employeeId !== b.employeeId) return a.employeeId.localeCompare(b.employeeId);
+      return b.date.localeCompare(a.date);
+    });
+
+    let html = "";
+    groupedArr.forEach(g => {
+      const isLate = g.clockin && g.clockin.time.slice(0,5) > settings.workStart;
       if (isLate) totalLate++;
+      let hrs = '-';
+      if (g.clockin && g.clockout) {
+        const diff = g.clockout.timestamp - g.clockin.timestamp;
+        hrs = (diff/3600000).toFixed(1) + 'h';
+        const workEndMin = parseInt(settings.workEnd.split(':')[0])*60 + parseInt(settings.workEnd.split(':')[1]);
+        const outMin = parseInt(g.clockout.time.slice(0,2))*60 + parseInt(g.clockout.time.slice(3,5));
+        if (outMin > workEndMin) {
+          const otMin = outMin - workEndMin;
+          totalOvertime += Math.round(otMin/60*10)/10;
+        }
+      }
       html += `<tr>
-        <td><strong>${r.employeeName}</strong><br><small style="color:var(--text-light)">${r.employeeId}</small></td>
-        <td>${r.date}</td>
-        <td>${r.type === 'clockin' ? r.time.slice(0,5) : '-'}</td>
-        <td>${r.type === 'clockout' ? r.time.slice(0,5) : '-'}</td>
-        <td>${r.type === 'clockout' ? '-' : '-'}</td>
-        <td>${isLate ? '<span class="tag tag-late">遲到</span>' : (r.type==='clockin'?'<span class="tag tag-in">準時</span>':'<span class="tag tag-out">下班</span>')}</td>
+        <td><strong>${g.employeeName}</strong><br><small style="color:var(--text-light)">${g.employeeId}</small></td>
+        <td>${g.date}</td>
+        <td>${g.clockin ? g.clockin.time.slice(0,5) : '-'}</td>
+        <td>${g.clockout ? g.clockout.time.slice(0,5) : '-'}</td>
+        <td>${hrs}</td>
+        <td>${isLate ? '<span class="tag tag-late">遲到</span>' : (g.clockin?'<span class="tag tag-in">準時</span>':'<span class="tag tag-absent">缺勤</span>')}</td>
       </tr>`;
     });
 
     document.getElementById("adminTableBody").innerHTML = html || '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-light)">此月尚無紀錄</td></tr>';
-    document.getElementById("statTotal").textContent = allRecords.length;
+    document.getElementById("statTotal").textContent = groupedArr.length;
     document.getElementById("statLate2").textContent = totalLate;
-    document.getElementById("statOnTime").textContent = Math.max(0, Math.floor(allRecords.length/2) - totalLate);
-    document.getElementById("statOvertime2").textContent = totalOvertime;
+    document.getElementById("statOnTime").textContent = Math.max(0, groupedArr.length - totalLate);
+    document.getElementById("statOvertime2").textContent = totalOvertime > 0 ? totalOvertime.toFixed(1) : '0';
   } catch(e) {
     console.error(e);
     document.getElementById("adminTableBody").innerHTML = '<tr><td colspan="6" style="color:var(--danger)">載入失敗</td></tr>';
   }
 }
 
+// ============ OVERVIEW ============
+let overviewAllRecords = [];
+
+async function loadOverviewData() {
+  if (!currentUser) return;
+  const ym = document.getElementById("overviewMonth").value;
+  const empFilter = document.getElementById("overviewEmployee").value;
+
+  try {
+    const empDoc = await db.collection(COLLECTION).doc("employees").get();
+    const employees = empDoc.exists ? empDoc.data().list : [];
+
+    const empSelect = document.getElementById("overviewEmployee");
+    const currentVal = empSelect.value;
+    empSelect.innerHTML = '<option value="all">全部員工</option>';
+    employees.forEach(e => {
+      if (e.role !== "admin") {
+        empSelect.innerHTML += `<option value="${e.id}" ${e.id===currentVal?'selected':''}>${e.name}（${e.id}）</option>`;
+      }
+    });
+
+    const targetEmployees = empFilter === "all" ? employees.filter(e => e.role !== "admin") : employees.filter(e => e.id === empFilter);
+
+    let allRecords = [];
+    for (const emp of targetEmployees) {
+      const snap = await db.collection(COLLECTION).doc("records").collection(emp.id).get();
+      snap.forEach(doc => {
+        const r = doc.data();
+        if (r.date && r.date.startsWith(ym)) allRecords.push(r);
+      });
+    }
+
+    const grouped = {};
+    allRecords.forEach(r => {
+      const key = r.employeeId + "_" + r.date;
+      if (!grouped[key]) grouped[key] = {employeeId:r.employeeId, employeeName:r.employeeName, date:r.date, clockin:null, clockout:null};
+      if (r.type === "clockin" && !grouped[key].clockin) grouped[key].clockin = r;
+      if (r.type === "clockout" && !grouped[key].clockout) grouped[key].clockout = r;
+    });
+
+    let totalLate = 0, totalOvertime = 0;
+    const groupedArr = Object.values(grouped).sort((a,b) => {
+      if (a.employeeId !== b.employeeId) return a.employeeId.localeCompare(b.employeeId);
+      return b.date.localeCompare(a.date);
+    });
+
+    let html = "";
+    groupedArr.forEach(g => {
+      const isLate = g.clockin && g.clockin.time.slice(0,5) > settings.workStart;
+      if (isLate) totalLate++;
+      let hrs = '-';
+      if (g.clockin && g.clockout) {
+        const diff = g.clockout.timestamp - g.clockin.timestamp;
+        hrs = (diff/3600000).toFixed(1) + 'h';
+        const workEndMin = parseInt(settings.workEnd.split(':')[0])*60 + parseInt(settings.workEnd.split(':')[1]);
+        const outMin = parseInt(g.clockout.time.slice(0,2))*60 + parseInt(g.clockout.time.slice(3,5));
+        if (outMin > workEndMin) totalOvertime += Math.round((outMin - workEndMin)/60*10)/10;
+      }
+      html += `<tr>
+        <td><strong>${g.employeeName}</strong><br><small style="color:var(--text-light)">${g.employeeId}</small></td>
+        <td>${g.date}</td>
+        <td>${g.clockin ? g.clockin.time.slice(0,5) : '-'}</td>
+        <td>${g.clockout ? g.clockout.time.slice(0,5) : '-'}</td>
+        <td>${hrs}</td>
+        <td>${isLate ? '<span class="tag tag-late">遲到</span>' : (g.clockin?'<span class="tag tag-in">準時</span>':'<span class="tag tag-absent">缺勤</span>')}</td>
+      </tr>`;
+    });
+
+    document.getElementById("overviewTableBody").innerHTML = html || '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-light)">此月尚無紀錄</td></tr>';
+    document.getElementById("ovStatTotal").textContent = groupedArr.length;
+    document.getElementById("ovStatLate").textContent = totalLate;
+    document.getElementById("ovStatOnTime").textContent = Math.max(0, groupedArr.length - totalLate);
+    document.getElementById("ovStatOT").textContent = totalOvertime > 0 ? totalOvertime.toFixed(1) : '0';
+    overviewAllRecords = allRecords;
+  } catch(e) {
+    console.error(e);
+    document.getElementById("overviewTableBody").innerHTML = '<tr><td colspan="6" style="color:var(--danger)">載入失敗</td></tr>';
+  }
+}
+
+function exportOverviewCSV() { exportCSV(overviewAllRecords, "出勤總覽"); }
+
+// ============ SALARY ============
+let salaryData = [];
+
+async function loadSalaryData() {
+  if (!currentUser) return;
+  const ym = document.getElementById("salaryMonth").value;
+
+  try {
+    const empDoc = await db.collection(COLLECTION).doc("employees").get();
+    const employees = empDoc.exists ? empDoc.data().list : [];
+    const workEmployees = employees.filter(e => e.role !== "admin");
+
+    salaryData = [];
+    for (const emp of workEmployees) {
+      const snap = await db.collection(COLLECTION).doc("records").collection(emp.id).get();
+      const monthRecords = [];
+      snap.forEach(doc => {
+        const r = doc.data();
+        if (r.date && r.date.startsWith(ym)) monthRecords.push(r);
+      });
+
+      const byDate = {};
+      monthRecords.forEach(r => {
+        if (!byDate[r.date]) byDate[r.date] = {};
+        byDate[r.date][r.type] = r;
+      });
+
+      let totalWorkDays = 0, lateDays = 0, absentDays = 0, overtimeMinutes = 0;
+      const daysInMonth = new Date(parseInt(ym.split("-")[0]), parseInt(ym.split("-")[1]), 0).getDate();
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${ym}-${String(d).padStart(2,'0')}`;
+        const dayOfWeek = new Date(parseInt(ym.split("-")[0]), parseInt(ym.split("-")[1])-1, d).getDay();
+        if (settings.restDays && settings.restDays.includes(dayOfWeek)) continue;
+        if (isSpecificHoliday(dateStr)) continue;
+
+        const day = byDate[dateStr];
+        if (day && (day.clockin || day.clockout)) {
+          totalWorkDays++;
+          if (day.clockin && day.clockin.time.slice(0,5) > settings.workStart) lateDays++;
+          if (day.clockin && day.clockout) {
+            let workMin = (day.clockout.timestamp - day.clockin.timestamp) / 60000;
+            if (settings.lunchDeduct) {
+              const lunchStartMin = parseInt(settings.lunchStart.split(':')[0])*60 + parseInt(settings.lunchStart.split(':')[1]);
+              const lunchEndMin = parseInt(settings.lunchEnd.split(':')[0])*60 + parseInt(settings.lunchEnd.split(':')[1]);
+              workMin -= (lunchEndMin - lunchStartMin);
+            }
+            const workEndMin = parseInt(settings.workEnd.split(':')[0])*60 + parseInt(settings.workEnd.split(':')[1]);
+            const outMin = parseInt(day.clockout.time.slice(0,2))*60 + parseInt(day.clockout.time.slice(3,5));
+            if (outMin > workEndMin) overtimeMinutes += (outMin - workEndMin);
+          }
+        } else {
+          absentDays++;
+        }
+      }
+
+      const baseSalary = emp.salary || 0;
+      const hourlyRate = baseSalary / 30 / 8;
+      const overtimeHrs = overtimeMinutes / 60;
+      const ot1Hrs = Math.min(overtimeHrs, 2);
+      const ot2Hrs = Math.min(Math.max(overtimeHrs - 2, 0), 2);
+      const ot3Hrs = Math.max(overtimeHrs - 4, 0);
+      const overtimePay = Math.round((ot1Hrs * hourlyRate * 1.34 + ot2Hrs * hourlyRate * 1.67 + ot3Hrs * hourlyRate * 2));
+      const fullAttendance = (lateDays === 0 && absentDays === 0 && settings.fullAttendanceBonus > 0);
+      const totalPay = baseSalary + overtimePay + (fullAttendance ? settings.fullAttendanceBonus : 0);
+
+      salaryData.push({
+        id: emp.id, name: emp.name, baseSalary, totalWorkDays, lateDays, absentDays,
+        overtimeHrs: overtimeHrs.toFixed(1), overtimePay, fullAttendance, totalPay
+      });
+    }
+
+    renderSalaryCards();
+  } catch(e) {
+    console.error(e);
+    document.getElementById("salaryCards").innerHTML = '<div style="color:var(--danger);padding:12px">載入失敗</div>';
+  }
+}
+
+function renderSalaryCards() {
+  if (salaryData.length === 0) {
+    document.getElementById("salaryCards").innerHTML = '<div style="text-align:center;color:var(--text-light);padding:24px">此月無員工資料</div>';
+    return;
+  }
+  let html = "";
+  salaryData.forEach(s => {
+    html += `<div class="card" style="margin:0 0 12px 0">
+      <div class="card-title">${s.name}<span style="font-size:11px;color:var(--text-light);font-weight:400;margin-left:8px">${s.id}</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+        <div>出勤天數：<strong>${s.totalWorkDays}</strong></div>
+        <div>遲到天數：<strong style="color:${s.lateDays>0?'var(--danger)':'inherit'}">${s.lateDays}</strong></div>
+        <div>缺勤天數：<strong style="color:${s.absentDays>0?'var(--danger)':'inherit'}">${s.absentDays}</strong></div>
+        <div>加班時數：<strong>${s.overtimeHrs}h</strong></div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>基本月薪</span><span>${s.baseSalary} 元</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>加班費</span><span>${s.overtimePay} 元</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>全勤獎金</span><span>${s.fullAttendance ? settings.fullAttendanceBonus + ' 元 ✓' : '—'}</span></div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-weight:700;font-size:15px;color:var(--primary)"><span>應發金額</span><span>${s.totalPay} 元</span></div>
+      </div>
+    </div>`;
+  });
+  document.getElementById("salaryCards").innerHTML = html;
+}
+
+function exportSalaryCSV() {
+  if (!salaryData || salaryData.length === 0) { showToast("⚠️ 沒有資料可匯出", 2000); return; }
+  let csv = "\uFEFF員工姓名,員工帳號,基本月薪,出勤天數,遲到天數,缺勤天數,加班時數,加班費,全勤獎金,應發金額\n";
+  salaryData.forEach(s => {
+    csv += `${s.name},${s.id},${s.baseSalary},${s.totalWorkDays},${s.lateDays},${s.absentDays},${s.overtimeHrs},${s.overtimePay},${s.fullAttendance?settings.fullAttendanceBonus:0},${s.totalPay}\n`;
+  });
+  downloadFile(csv, "薪資試算.csv", "text/csv;charset=utf-8");
+}
+
 // ============ EMPLOYEE MANAGEMENT ============
 async function adminAddEmployee() {
   const name = document.getElementById("addEmpName").value.trim();
   const pw = document.getElementById("addEmpPw").value;
+  const role = document.getElementById("addEmpRole").value;
+  const salary = parseInt(document.getElementById("addEmpSalary").value) || 0;
   const errEl = document.getElementById("addEmpError");
   const successEl = document.getElementById("addEmpSuccess");
 
@@ -1107,14 +1509,17 @@ async function adminAddEmployee() {
     const id = await getNextEmployeeId();
     const doc = await db.collection(COLLECTION).doc("employees").get();
     const employees = doc.exists ? doc.data().list : [];
-    employees.push({name, id, pw, role:"employee", forcePasswordChange:true, createdAt: Date.now()});
+    employees.push({name, id, pw, role, salary, forcePasswordChange:true, createdAt: Date.now()});
     await db.collection(COLLECTION).doc("employees").set({list: employees});
     errEl.classList.add("hidden");
-    successEl.innerHTML = `✅ 已新增：<strong>${name}</strong>｜帳號：<strong>${id}</strong>｜密碼：<strong>${pw}</strong><br><small style="color:var(--text-light)">員工首次登入後需更改密碼</small>`;
+    const roleLabel = role === "accountant" ? "會計人員" : "一般員工";
+    successEl.innerHTML = `✅ 已新增：<strong>${name}</strong>｜帳號：<strong>${id}</strong>｜密碼：<strong>${pw}</strong><br>角色：${roleLabel}｜月薪：${salary}元<br><small style="color:var(--text-light)">員工首次登入後需更改密碼</small>`;
     successEl.classList.remove("hidden");
     document.getElementById("addEmpName").value = "";
     document.getElementById("addEmpPw").value = "";
+    document.getElementById("addEmpSalary").value = "";
     loadEmployeeList();
+    loadMakeupEmployeeList();
   } catch(e) {
     errEl.textContent = "新增失敗：" + e.message; errEl.classList.remove("hidden"); successEl.classList.add("hidden");
   }
@@ -1128,11 +1533,15 @@ async function loadEmployeeList() {
     let html = "";
     employees.forEach(emp => {
       const isPending = emp.forcePasswordChange ? '<span class="tag tag-late" style="margin-left:4px">待改密</span>' : '';
+      const roleLabel = emp.role === "admin" ? "管理員" : (emp.role === "accountant" ? "會計" : "員工");
+      const roleClass = emp.role === "admin" ? "tag-late" : (emp.role === "accountant" ? "tag-out" : "tag-in");
+      const salaryText = emp.salary ? `｜月薪 ${emp.salary}元` : '';
       html += `<div class="history-row">
         <div class="history-date">${emp.id}</div>
         <div class="history-times">
           <strong>${emp.name}</strong>
-          <span class="tag ${emp.role==='admin'?'tag-late':'tag-in'}" style="margin-left:6px">${emp.role==='admin'?'管理員':'員工'}</span>
+          <span class="tag ${roleClass}" style="margin-left:6px">${roleLabel}</span>
+          <span style="font-size:11px;color:var(--text-light);margin-left:4px">${salaryText}</span>
           ${isPending}
         </div>
         <button class="btn btn-danger btn-sm" onclick="adminDeleteEmployee('${emp.id}','${emp.name}')" ${emp.role==='admin'?'disabled style="opacity:0.3"':''}>刪除</button>
@@ -1144,6 +1553,64 @@ async function loadEmployeeList() {
   }
 }
 
+async function loadMakeupEmployeeList() {
+  if (!currentUser || currentUser.role !== "admin") return;
+  try {
+    const doc = await db.collection(COLLECTION).doc("employees").get();
+    const employees = doc.exists ? doc.data().list : [];
+    const sel = document.getElementById("makeupEmployee");
+    sel.innerHTML = '<option value="">請選擇員工</option>';
+    employees.forEach(emp => {
+      if (emp.role !== "admin") {
+        sel.innerHTML += `<option value="${emp.id}">${emp.name}（${emp.id}）</option>`;
+      }
+    });
+  } catch(e) { console.error(e); }
+}
+
+async function doMakeupPunch() {
+  const empId = document.getElementById("makeupEmployee").value;
+  const date = document.getElementById("makeupDate").value;
+  const type = document.getElementById("makeupType").value;
+  const time = document.getElementById("makeupTime").value;
+  const errEl = document.getElementById("makeupError");
+  const successEl = document.getElementById("makeupSuccess");
+
+  errEl.classList.add("hidden");
+  successEl.classList.add("hidden");
+
+  if (!empId || !date || !time) { errEl.textContent = "請填寫所有欄位"; errEl.classList.remove("hidden"); return; }
+
+  try {
+    const doc = await db.collection(COLLECTION).doc("employees").get();
+    const employees = doc.exists ? doc.data().list : [];
+    const emp = employees.find(e => e.id === empId);
+    if (!emp) { errEl.textContent = "找不到員工"; errEl.classList.remove("hidden"); return; }
+
+    const [h, m] = time.split(":");
+    const dt = new Date(date + "T" + time + ":00");
+    const record = {
+      employeeId: empId,
+      employeeName: emp.name,
+      type: type,
+      timestamp: dt.getTime(),
+      date: date,
+      time: time + ":00",
+      location: null,
+      dateKey: date,
+      isManual: true
+    };
+
+    await db.collection(COLLECTION).doc("records").collection(empId).add(record);
+    successEl.innerHTML = `✅ 已補登：<strong>${emp.name}</strong>｜${date}｜${type==='clockin'?'上班':'下班'} ${time}`;
+    successEl.classList.remove("hidden");
+    document.getElementById("makeupDate").value = "";
+    document.getElementById("makeupTime").value = "09:00";
+  } catch(e) {
+    errEl.textContent = "補登失敗：" + e.message; errEl.classList.remove("hidden");
+  }
+}
+
 async function adminDeleteEmployee(empId, empName) {
   if (!confirm(`確定要刪除「${empName}（${empId}）」嗎？`)) return;
   try {
@@ -1152,6 +1619,7 @@ async function adminDeleteEmployee(empId, empName) {
     await db.collection(COLLECTION).doc("employees").set({list: employees.filter(e => e.id !== empId)});
     showToast(`✅ 已刪除 ${empName}`, 2000);
     loadEmployeeList();
+    loadMakeupEmployeeList();
   } catch(e) { showToast("❌ 刪除失敗：" + e.message, 3000); }
 }
 
@@ -1176,17 +1644,21 @@ async function loadSettings() {
     const doc = await db.collection(COLLECTION).doc("settings").get();
     if (doc.exists) {
       settings = {...settings, ...doc.data()};
-      document.getElementById("inputRange").value = settings.range;
-      document.getElementById("workStart").value = settings.workStart;
-      document.getElementById("workEnd").value = settings.workEnd;
-      document.getElementById("idPrefix").value = settings.idPrefix || "A";
-      document.getElementById("idStartNum").value = settings.idStartNum || 1;
-      document.getElementById("idDigits").value = settings.idDigits || 3;
+      document.getElementById("inputRange2").value = settings.range;
+      document.getElementById("workStart2").value = settings.workStart;
+      document.getElementById("workEnd2").value = settings.workEnd;
+      document.getElementById("lunchStart").value = settings.lunchStart || "12:00";
+      document.getElementById("lunchEnd").value = settings.lunchEnd || "13:00";
+      document.getElementById("lunchDeduct").checked = settings.lunchDeduct || false;
+      document.getElementById("fullAttBonus").value = settings.fullAttendanceBonus || 0;
+      document.getElementById("idPrefix2").value = settings.idPrefix || "A";
+      document.getElementById("idStartNum2").value = settings.idStartNum || 1;
+      document.getElementById("idDigits2").value = settings.idDigits || 3;
       updateIdPreview();
       if (settings.companyLat && settings.companyLng) {
-        document.getElementById("companyLocation").textContent = `${settings.companyLat.toFixed(5)}, ${settings.companyLng.toFixed(5)}`;
+        document.getElementById("companyLocation2").textContent = `${settings.companyLat.toFixed(5)}, ${settings.companyLng.toFixed(5)}`;
       }
-      document.getElementById("companyRange").textContent = settings.range + " 公尺";
+      document.getElementById("companyRange2").textContent = settings.range + " 公尺";
       if (settings.companyName) {
         document.getElementById("loginTitle").textContent = settings.companyName + " GPS 打卡系統";
         document.getElementById("headerTitle").textContent = settings.companyName + " GPS 打卡";
@@ -1200,24 +1672,38 @@ async function setCompanyLocation() {
   settings.companyLat = currentLocation.lat;
   settings.companyLng = currentLocation.lng;
   await db.collection(COLLECTION).doc("settings").set(settings);
-  document.getElementById("companyLocation").textContent = `${currentLocation.lat.toFixed(5)}, ${currentLocation.lng.toFixed(5)}`;
+  document.getElementById("companyLocation2").textContent = `${currentLocation.lat.toFixed(5)}, ${currentLocation.lng.toFixed(5)}`;
   updateLocationUI();
   showToast("✅ 公司位置已設定", 2000);
 }
 
 async function saveCompanyRange() {
-  settings.range = parseInt(document.getElementById("inputRange").value) || 500;
+  settings.range = parseInt(document.getElementById("inputRange2").value) || 500;
   await db.collection(COLLECTION).doc("settings").set(settings);
-  document.getElementById("companyRange").textContent = settings.range + " 公尺";
+  document.getElementById("companyRange2").textContent = settings.range + " 公尺";
   updateLocationUI();
   showToast("✅ 打卡範圍已更新", 2000);
 }
 
 async function saveWorkHours() {
-  settings.workStart = document.getElementById("workStart").value;
-  settings.workEnd = document.getElementById("workEnd").value;
+  settings.workStart = document.getElementById("workStart2").value;
+  settings.workEnd = document.getElementById("workEnd2").value;
   await db.collection(COLLECTION).doc("settings").set(settings);
   showToast("✅ 上下班時間已更新", 2000);
+}
+
+async function saveLunchSettings() {
+  settings.lunchStart = document.getElementById("lunchStart").value;
+  settings.lunchEnd = document.getElementById("lunchEnd").value;
+  settings.lunchDeduct = document.getElementById("lunchDeduct").checked;
+  await db.collection(COLLECTION).doc("settings").set(settings);
+  showToast("✅ 休息時間已更新", 2000);
+}
+
+async function saveFullAttBonus() {
+  settings.fullAttendanceBonus = parseInt(document.getElementById("fullAttBonus").value) || 0;
+  await db.collection(COLLECTION).doc("settings").set(settings);
+  showToast("✅ 全勤獎金已更新", 2000);
 }
 
 // ============ REST DAYS ============
@@ -1231,11 +1717,12 @@ function buildRestDayUI() {
     </label>`;
   }
   html += '</div>';
-  document.getElementById("restDaySettings").innerHTML = html;
+  const el = document.getElementById("restDaySettings2");
+  if (el) el.innerHTML = html;
 }
 
 async function saveRestDays() {
-  const checkboxes = document.querySelectorAll('#restDaySettings input[type="checkbox"]');
+  const checkboxes = document.querySelectorAll('#restDaySettings2 input[type="checkbox"]');
   settings.restDays = [];
   checkboxes.forEach(cb => { if (cb.checked) settings.restDays.push(parseInt(cb.value)); });
   await db.collection(COLLECTION).doc("settings").set(settings);
@@ -1245,8 +1732,10 @@ async function saveRestDays() {
 // ============ SPECIFIC HOLIDAYS ============
 function renderHolidayList() {
   const holidays = settings.specificHolidays || [];
+  const el = document.getElementById("holidayList2");
+  if (!el) return;
   if (holidays.length === 0) {
-    document.getElementById("holidayList").innerHTML = '<div style="text-align:center;color:var(--text-light);padding:12px;font-size:13px">尚未設定特定休假日</div>';
+    el.innerHTML = '<div style="text-align:center;color:var(--text-light);padding:12px;font-size:13px">尚未設定特定休假日</div>';
     return;
   }
   let html = '';
@@ -1257,20 +1746,20 @@ function renderHolidayList() {
       <button class="btn btn-danger btn-sm" onclick="removeHoliday(${i})">✕</button>
     </div>`;
   });
-  document.getElementById("holidayList").innerHTML = html;
+  el.innerHTML = html;
 }
 
 function addHoliday() {
-  const date = document.getElementById("holidayDate").value;
-  const name = document.getElementById("holidayName").value.trim();
+  const date = document.getElementById("holidayDate2").value;
+  const name = document.getElementById("holidayName2").value.trim();
   if (!date || !name) { showToast("⚠️ 請填寫日期和名稱", 2000); return; }
   if (!settings.specificHolidays) settings.specificHolidays = [];
   if (settings.specificHolidays.some(h => h.date === date)) {
     showToast("⚠️ 該日期已存在", 2000); return;
   }
   settings.specificHolidays.push({date, name});
-  document.getElementById("holidayDate").value = "";
-  document.getElementById("holidayName").value = "";
+  document.getElementById("holidayDate2").value = "";
+  document.getElementById("holidayName2").value = "";
   renderHolidayList();
   showToast("✅ 已加入，請按儲存", 2000);
 }
@@ -1293,16 +1782,17 @@ function isSpecificHoliday(dateStr) {
 
 // ============ ID RULE ============
 function updateIdPreview() {
-  const prefix = document.getElementById("idPrefix").value.toUpperCase() || "A";
-  const num = parseInt(document.getElementById("idStartNum").value) || 1;
-  const digits = parseInt(document.getElementById("idDigits").value) || 3;
-  document.getElementById("idPreview").textContent = prefix + String(num).padStart(digits, "0");
+  const prefix = (document.getElementById("idPrefix2")?.value || "A").toUpperCase();
+  const num = parseInt(document.getElementById("idStartNum2")?.value) || 1;
+  const digits = parseInt(document.getElementById("idDigits2")?.value) || 3;
+  const el = document.getElementById("idPreview2");
+  if (el) el.textContent = prefix + String(num).padStart(digits, "0");
 }
 
 async function saveIdRule() {
-  settings.idPrefix = document.getElementById("idPrefix").value.toUpperCase() || "A";
-  settings.idStartNum = parseInt(document.getElementById("idStartNum").value) || 1;
-  settings.idDigits = parseInt(document.getElementById("idDigits").value) || 3;
+  settings.idPrefix = document.getElementById("idPrefix2").value.toUpperCase() || "A";
+  settings.idStartNum = parseInt(document.getElementById("idStartNum2").value) || 1;
+  settings.idDigits = parseInt(document.getElementById("idDigits2").value) || 3;
   await db.collection(COLLECTION).doc("settings").set(settings);
   updateIdPreview();
   showToast("✅ 編號規則已更新", 2000);
@@ -1399,10 +1889,12 @@ function switchPage(name, btn) {
   document.getElementById("page"+name).classList.add("active");
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
   if (btn) btn.classList.add("active");
-  if (name === "Admin" && currentUser.role === "admin") { loadAdminData(); loadEmployeeList(); }
+  if (name === "Admin" && currentUser.role === "admin") { loadAdminData(); loadEmployeeList(); loadMakeupEmployeeList(); }
+  if (name === "Overview") loadOverviewData();
+  if (name === "Salary") loadSalaryData();
+  if (name === "Settings") { buildRestDayUI(); renderHolidayList(); }
   if (name === "History") loadHistory();
   if (name === "Calendar") loadCalendar();
-  if (name === "Profile") { buildRestDayUI(); renderHolidayList(); }
 }
 
 function showToast(msg, duration) {
@@ -1425,11 +1917,16 @@ window.addEventListener("load", async () => {
         const latest = employees.find(e => e.id === currentUser.id);
         if (latest) {
           currentUser.forcePasswordChange = latest.forcePasswordChange;
+          currentUser.role = latest.role || currentUser.role;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
+        } else {
+          currentUser = null;
+          localStorage.removeItem(STORAGE_KEY);
+          return;
         }
       }
       enterApp();
-    } catch(e) { showLogin && showLogin(); }
+    } catch(e) { /* stay on login page */ }
   }
 });
 
@@ -1437,8 +1934,9 @@ document.addEventListener("keydown", e => {
   if (e.key === "Enter" && !document.getElementById("loginPage").style.display.includes("none")) doLogin();
 });
 
-["idPrefix","idStartNum","idDigits"].forEach(id => {
-  document.getElementById(id).addEventListener("input", updateIdPreview);
+["idPrefix2","idStartNum2","idDigits2"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", updateIdPreview);
 });
 
 document.getElementById("pwChangeModal").addEventListener("click", e => {
